@@ -13,7 +13,7 @@ SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Credentials to test
-email    = "admin@yourdomain.com"
+email    = "chrisverdin2014@gmail.com"
 password = "NewStrongP@ssw0rd!"
 
 print("Attempting sign-in for:", email)
