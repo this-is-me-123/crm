@@ -9,3 +9,4 @@ jinja2
 python-multipart
 vonage
 playwright
+psycopg2-binary
