@@ -1,10 +1,3 @@
-# main.py
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-
-
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
@@ -13,11 +6,7 @@ from sqlmodel import Session, select
 
 from models import Subscriber, MessageLog
 from db import get_session, init_db
-from auth import login_user, verify_jwt  # <-- updated import
-
-# (Optional) if you’ve hooked up email/SMS utils:
-# from email_utils import send_email
-# from sms_utils import send_sms
+from auth import login_user, verify_jwt  # Supabase auth
 
 app = FastAPI()
 init_db()
@@ -25,26 +14,28 @@ init_db()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# --- Health Check ---
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 
 # --- Authentication Routes ---
-
 @app.get("/login")
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
-    # calls the Supabase auth handler in auth.py
     return await login_user(request, email, password)
 
 
 # --- Protected Admin Routes ---
-
 @app.get("/")
 def dashboard(
     request: Request,
     session: Session = Depends(get_session),
-    token=Depends(verify_jwt)        # <-- protect with JWT
+    token=Depends(verify_jwt)
 ):
     subs = session.exec(select(Subscriber)).all()
     return templates.TemplateResponse("dashboard.html", {"request": request, "subs": subs})
@@ -112,14 +103,10 @@ def send_message(
     session: Session = Depends(get_session),
     token=Depends(verify_jwt)
 ):
-    # log message
     log = MessageLog(subscriber_id=sub_id, message=message)
     session.add(log)
     session.commit()
-    # -- Integrate real sending here, e.g.:
-    # sub = session.get(Subscriber, sub_id)
-    # send_email(sub.email, "New Message", message)
-    # send_sms(sub.phone, message)
+    # Integrate actual sending here (email_utils.send_email, sms_utils.send_sms)
     return RedirectResponse(f"/subscriber/{sub_id}", status_code=303)
 
 
