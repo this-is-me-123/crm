@@ -10,3 +10,5 @@ python-multipart
 vonage
 playwright
 psycopg2-binary
+email_utils dependencies (requests, etc.)
+apscheduler
