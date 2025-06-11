@@ -8,7 +8,6 @@ from sqlmodel import Session, select
 
 from models import Subscriber, MessageLog
 from db import init_db, get_session
-from auth import login_user, verify_jwt         # ← import verify_jwt, not verify_jwt_cookie
 
 app = FastAPI()
 init_db()
@@ -17,52 +16,20 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# Public routes
-
 @app.get("/")
-def root():
-    return RedirectResponse("/login")
-
-
-@app.get("/login")
-def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
-
-@app.post("/login")
-async def login(request: Request, email: str = Form(...), password: str = Form(...)):
-    return await login_user(request, email, password)
-
-
-# Protected dashboard
-
-@app.get("/dashboard")
-def dashboard(
-    request: Request,
-    session: Session = Depends(get_session),
-    user=Depends(verify_jwt)
-):
+def dashboard(request: Request, session: Session = Depends(get_session)):
     subs = session.exec(select(Subscriber)).all()
     return templates.TemplateResponse("dashboard.html", {"request": request, "subs": subs})
 
 
-# Subscriber management
-
 @app.get("/subscribers")
-def list_subscribers(
-    request: Request,
-    session: Session = Depends(get_session),
-    user=Depends(verify_jwt)
-):
+def list_subscribers(request: Request, session: Session = Depends(get_session)):
     subs = session.exec(select(Subscriber)).all()
     return templates.TemplateResponse("subscribers.html", {"request": request, "subs": subs})
 
 
 @app.get("/subscriber/add")
-def add_subscriber_form(
-    request: Request,
-    user=Depends(verify_jwt)
-):
+def add_subscriber_form(request: Request):
     return templates.TemplateResponse("add_subscriber.html", {"request": request})
 
 
@@ -74,7 +41,6 @@ def add_subscriber(
     tier: str = Form("free"),
     tags: str = Form(""),
     session: Session = Depends(get_session),
-    user=Depends(verify_jwt)
 ):
     sub = Subscriber(username=username, email=email, tier=tier, tags=tags)
     session.add(sub)
@@ -83,33 +49,19 @@ def add_subscriber(
 
 
 @app.get("/subscriber/{sub_id}")
-def subscriber_detail(
-    sub_id: int,
-    request: Request,
-    session: Session = Depends(get_session),
-    user=Depends(verify_jwt)
-):
+def subscriber_detail(sub_id: int, request: Request, session: Session = Depends(get_session)):
     sub  = session.get(Subscriber, sub_id)
     logs = session.exec(select(MessageLog).where(MessageLog.subscriber_id == sub_id)).all()
     return templates.TemplateResponse("subscriber_detail.html", {"request": request, "sub": sub, "logs": logs})
 
 
 @app.get("/subscriber/{sub_id}/message")
-def send_message_form(
-    sub_id: int,
-    request: Request,
-    user=Depends(verify_jwt)
-):
+def send_message_form(sub_id: int, request: Request):
     return templates.TemplateResponse("send_message.html", {"request": request, "sub_id": sub_id})
 
 
 @app.post("/subscriber/{sub_id}/message")
-def send_message(
-    sub_id: int,
-    message: str = Form(...),
-    session: Session = Depends(get_session),
-    user=Depends(verify_jwt)
-):
+def send_message(sub_id: int, message: str = Form(...), session: Session = Depends(get_session)):
     log = MessageLog(subscriber_id=sub_id, message=message)
     session.add(log)
     session.commit()
@@ -117,11 +69,6 @@ def send_message(
 
 
 @app.get("/segments/{tag}")
-def segment_by_tag(
-    tag: str,
-    request: Request,
-    session: Session = Depends(get_session),
-    user=Depends(verify_jwt)
-):
+def segment_by_tag(tag: str, request: Request, session: Session = Depends(get_session)):
     subs = session.exec(select(Subscriber).where(Subscriber.tags.contains(tag))).all()
     return templates.TemplateResponse("subscribers.html", {"request": request, "subs": subs})
