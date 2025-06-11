@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
-load_dotenv()  # Loads environment variables from a .env file
-
+load_dotenv()
 from sqlmodel import create_engine, Session, SQLModel
 import os
 

@@ -2,6 +2,10 @@ fastapi
 uvicorn[standard]
 sqlmodel
 python-dotenv
-psycopg2-binary
+supabase
+python-jose
 jinja2
 python-multipart
+psycopg2-binary
+sendgrid
+twilio

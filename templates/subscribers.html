@@ -5,7 +5,7 @@
   {% for sub in subs %}
     <li>
       <a href="/subscriber/{{ sub.id }}">{{ sub.username }}</a>
-      ({{ sub.tier }}, {{ sub.tags or '' }})
+      ({{ sub.tier }}, {{ sub.tags or '' }}, {{ sub.phone or '' }})
     </li>
   {% endfor %}
 </ul>
