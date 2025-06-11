@@ -1,19 +1,18 @@
 import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+import requests
 
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
-EMAIL_FROM = os.getenv("EMAIL_FROM", "your_verified_sendgrid_email@example.com")
+MAILGUN_DOMAIN = os.environ.get("MAILGUN_DOMAIN")
+MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY")
+MAILGUN_FROM = os.environ.get("MAILGUN_FROM", "noreply@example.com")
 
-def send_email(to_email: str, subject: str, content: str):
-    if not SENDGRID_API_KEY:
-        raise Exception("No SENDGRID_API_KEY set")
-    message = Mail(
-        from_email=EMAIL_FROM,
-        to_emails=to_email,
-        subject=subject,
-        plain_text_content=content,
+def send_email(to_email, subject, content):
+    return requests.post(
+        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
+        auth=("api", MAILGUN_API_KEY),
+        data={
+            "from": MAILGUN_FROM,
+            "to": [to_email],
+            "subject": subject,
+            "text": content,
+        },
     )
-    sg = SendGridAPIClient(SENDGRID_API_KEY)
-    response = sg.send(message)
-    return response.status_code

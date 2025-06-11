@@ -1,17 +1,17 @@
 import os
-from twilio.rest import Client
+from vonage import Client, Sms
 
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+VONAGE_API_KEY = os.environ.get("VONAGE_API_KEY")
+VONAGE_API_SECRET = os.environ.get("VONAGE_API_SECRET")
+VONAGE_FROM = os.environ.get("VONAGE_FROM", "VonageSMS")
 
-def send_sms(to_phone: str, body: str):
-    if not (TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER):
-        raise Exception("Twilio credentials not set")
-    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    message = client.messages.create(
-        body=body,
-        from_=TWILIO_PHONE_NUMBER,
-        to=to_phone,
-    )
-    return message.sid
+client = Client(key=VONAGE_API_KEY, secret=VONAGE_API_SECRET)
+sms = Sms(client)
+
+def send_sms(to_number, content):
+    response = sms.send_message({
+        "from": VONAGE_FROM,
+        "to": to_number,
+        "text": content,
+    })
+    return response

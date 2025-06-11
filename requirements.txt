@@ -3,9 +3,9 @@ uvicorn[standard]
 sqlmodel
 python-dotenv
 supabase
-python-jose
+jose
+requests
 jinja2
 python-multipart
-psycopg2-binary
-sendgrid
-twilio
+vonage
+playwright
