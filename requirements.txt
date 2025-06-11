@@ -3,7 +3,7 @@ uvicorn[standard]
 sqlmodel
 python-dotenv
 supabase
-jose
+python-jose[cryptography]
 requests
 jinja2
 python-multipart
