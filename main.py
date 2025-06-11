@@ -21,6 +21,11 @@ def health():
 
 
 # --- Authentication Routes ---
+@app.get("/auth/callback")
+def auth_callback(request: Request):
+    # Just serve the HTML file; no auth check
+    return templates.TemplateResponse("auth_callback.html", {"request": request})
+
 @app.get("/login")
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
